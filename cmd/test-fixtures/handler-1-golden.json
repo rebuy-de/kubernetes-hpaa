@@ -9,7 +9,7 @@
             "app": "example-app"
         },
         "annotations": {
-            "rebuy.com/kubernetes-hpaa.min-replicas": "6"
+            "rebuy.com/kubernetes-hpaa.lower-replica-limit": "6"
         }
     },
     "spec": {
@@ -17,11 +17,11 @@
             "kind": "",
             "name": ""
         },
-        "minReplicas": 6,
+        "minReplicas": 10,
         "maxReplicas": 40
     },
     "status": {
-        "lastScaleTime": "2018-02-12T19:55:29Z",
+        "lastScaleTime": "2018-02-12T19:00:00Z",
         "currentReplicas": 11,
         "desiredReplicas": 11
     }
