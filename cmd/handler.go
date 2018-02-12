@@ -2,70 +2,105 @@ package cmd
 
 import (
 	"fmt"
-	"strconv"
 	"time"
 
-	"k8s.io/api/autoscaling/v1"
+	log "github.com/sirupsen/logrus"
+	autoscaling "k8s.io/api/autoscaling/v1"
 	"k8s.io/apimachinery/pkg/util/clock"
+	"k8s.io/client-go/kubernetes"
 )
 
 type Handler struct {
-	clock clock.Clock
-
-	DownscaleCooldown time.Duration
+	clock  clock.Clock
+	Client kubernetes.Interface
 }
 
-func NewHandler(cd time.Duration) *Handler {
-	return &Handler{
-		clock: new(clock.RealClock),
-
-		DownscaleCooldown: cd,
+func (h *Handler) now() time.Time {
+	if h.clock == nil {
+		h.clock = new(clock.RealClock)
 	}
+
+	return h.clock.Now()
 }
 
-func (h *Handler) Run(hpa *v1.HorizontalPodAutoscaler) (*v1.HorizontalPodAutoscaler, error) {
-	now := h.clock.Now()
-	last := hpa.Status.LastScaleTime
-	deadline := last.Add(h.DownscaleCooldown)
-
-	currReplicas := hpa.Status.CurrentReplicas
-	lowerLimit, err := getAnnotationInt(hpa, "lower-replica-limit")
-	if err != nil {
-		return nil, err
-	}
-
-	newMinReplicas := currReplicas
-
-	if now.After(deadline) {
-		newMinReplicas--
-	}
-
-	newMinReplicas = max(newMinReplicas, lowerLimit)
-	hpa.Spec.MinReplicas = &newMinReplicas
-
-	return hpa, nil
+func (h *Handler) OnAdd(obj interface{}) {
+	h.Handle(obj)
 }
 
-func max(a, b int32) int32 {
-	if a > b {
-		return a
-	}
-	return b
+func (h *Handler) OnUpdate(oldObj, newObj interface{}) {
+	h.Handle(newObj)
 }
 
-func getAnnotationInt(hpa *v1.HorizontalPodAutoscaler, name string) (int32, error) {
-	tpl := "rebuy.com/kubernetes-hpaa.%s"
-	key := fmt.Sprintf(tpl, name)
+func (h *Handler) OnDelete(obj interface{}) {}
 
-	s, ok := hpa.ObjectMeta.Annotations[key]
+func (h *Handler) Handle(obj interface{}) {
+	hpa, ok := obj.(*autoscaling.HorizontalPodAutoscaler)
 	if !ok {
-		return 0, fmt.Errorf("no annotation with key %s found", key)
+		log.WithFields(log.Fields{
+			"Type": fmt.Sprintf("%T", obj),
+		}).Error("got unexpected object")
+		return
 	}
 
-	i, err := strconv.Atoi(s)
+	v := HPAView(*hpa)
+	logger := v.Logger()
+	logger.Debug("received new HPA")
+
+	minReplicas, err := h.Run(v)
 	if err != nil {
-		return 0, err
+		logger.Warn(err)
+		return
 	}
 
-	return int32(i), nil
+	if minReplicas == nil {
+		logger.Debug("no changes")
+		return
+	}
+
+	hpa.Spec.MinReplicas = minReplicas
+	hpa.ObjectMeta.Annotations[AnnotationLastChange] = time.Now().Format(time.RFC3339)
+
+	_, err = h.Client.
+		AutoscalingV1().
+		HorizontalPodAutoscalers(hpa.ObjectMeta.Namespace).
+		Update(hpa)
+	if err != nil {
+		logger.Error(err)
+	}
+}
+
+func (h *Handler) Run(v HPAView) (*int32, error) {
+	logger := v.Logger()
+	now := h.now()
+
+	lrl := v.LowerReplicaLimit()
+	if lrl == nil {
+		logger.Debug("ignoring HPA, because of missing annotations")
+		return nil, nil
+	}
+
+	oldMinReplicas := v.MinReplicas()
+	newMinReplicas := max(v.CurrentReplicas()-1, *lrl)
+
+	if newMinReplicas == oldMinReplicas {
+		logger.Debug("(nothingtodohere)")
+		return nil, nil
+	}
+
+	if newMinReplicas > oldMinReplicas {
+		logger.Infof("scaling up .spec.minReplicas from %d to %d",
+			v.MinReplicas(), newMinReplicas)
+		return &newMinReplicas, nil
+	}
+
+	deadline := v.LastChange().Add(*v.DownscaleCooldown())
+	if now.Before(deadline) {
+		logger.Infof("next scale down is in %v (%v)", deadline.Sub(now), deadline)
+		return nil, nil
+	}
+
+	logger.Infof("scaling down .spec.minReplicas from %d to %d",
+		v.MinReplicas(), newMinReplicas)
+
+	return &newMinReplicas, nil
 }
