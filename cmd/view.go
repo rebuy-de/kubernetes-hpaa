@@ -40,19 +40,19 @@ func (v HPAView) Namespace() string {
 	return v.ObjectMeta.Namespace
 }
 
-func (v HPAView) LastChange() *time.Time {
+func (v HPAView) LastChange() time.Time {
 	s, ok := v.ObjectMeta.Annotations[AnnotationLastChange]
 	if !ok {
-		return nil
+		return time.Unix(0, 0)
 	}
 
 	t, err := time.Parse(time.RFC3339, s)
 	if err != nil {
 		log.Errorf("failed to convert `%s` to time in last-change", s)
-		return nil
+		return time.Unix(0, 0)
 	}
 
-	return &t
+	return t
 }
 
 func (v HPAView) LowerReplicaLimit() *int32 {
