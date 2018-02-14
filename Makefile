@@ -1,3 +1,3 @@
-PACKAGE=github.com/rebuy-de/exporter-merger
+PACKAGE=github.com/rebuy-de/kubernetes-hpaa
 
 include golang.mk

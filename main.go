@@ -1,7 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"github.com/rebuy-de/kubernetes-hpaa/cmd"
+	log "github.com/sirupsen/logrus"
+)
 
 func main() {
-	fmt.Println("test")
+	if err := cmd.NewRootCommand().Execute(); err != nil {
+		log.Fatal(err)
+	}
 }
