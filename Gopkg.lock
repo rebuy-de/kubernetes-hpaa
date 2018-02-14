@@ -104,10 +104,10 @@
   version = "v2.0.1"
 
 [[projects]]
-  branch = "initial-pr"
   name = "github.com/rebuy-de/rebuy-go-sdk"
   packages = ["cmdutil"]
-  revision = "935b23a39bb4b74bbcbef639d0ca2096ad89ac50"
+  revision = "83f49db7b780f8083fbd32761f8dead708fd8a58"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/sirupsen/logrus"
@@ -184,6 +184,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "db6eef480a19b2d581b5016533dfb47efe438d8fad0926abf4baa1affb12e7d6"
+  inputs-digest = "2647d324d0a24e723fa073afc221ef2ec43b95b67c7915e611fd879987a2a5f2"
   solver-name = "gps-cdcl"
   solver-version = 1
