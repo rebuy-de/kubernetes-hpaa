@@ -104,6 +104,12 @@
   version = "v2.0.1"
 
 [[projects]]
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
   name = "github.com/rebuy-de/rebuy-go-sdk"
   packages = ["cmdutil"]
   revision = "83f49db7b780f8083fbd32761f8dead708fd8a58"
@@ -152,6 +158,12 @@
   revision = "4e4a3210bb54bb31f6ab2cdca2edcc0b50c420c1"
 
 [[projects]]
+  name = "gopkg.in/gemnasium/logrus-graylog-hook.v2"
+  packages = ["."]
+  revision = "c4a7de647eaaac00ffea599b7773e5e6804fa3b7"
+  version = "v2.0.7"
+
+[[projects]]
   name = "gopkg.in/inf.v0"
   packages = ["."]
   revision = "3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4"
@@ -184,6 +196,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2647d324d0a24e723fa073afc221ef2ec43b95b67c7915e611fd879987a2a5f2"
+  inputs-digest = "a7c83676d42ea3dae3393dbc8373333a0fad1641cabe57fbaf2b63d3dbded7de"
   solver-name = "gps-cdcl"
   solver-version = 1
