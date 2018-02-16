@@ -25,7 +25,7 @@ func (v HPAView) Logger() *log.Entry {
 		".spec.minReplicas":       v.MinReplicas(),
 		".spec.maxReplicas":       v.Spec.MaxReplicas,
 		".status.lastScaleTime":   v.Status.LastScaleTime,
-		".status.currentReplicas": v.Status.CurrentReplicas,
+		".status.desiredReplicas": v.Status.DesiredReplicas,
 		"#lastChange":             v.LastChange(),
 		"#lowerReplicaLimit":      v.LowerReplicaLimit(),
 		"#downscaleCooldown":      v.DownscaleCooldown(),
@@ -94,6 +94,6 @@ func (v HPAView) MinReplicas() int32 {
 	return *v.Spec.MinReplicas
 }
 
-func (v HPAView) CurrentReplicas() int32 {
-	return v.Status.CurrentReplicas
+func (v HPAView) DesiredReplicas() int32 {
+	return v.Status.DesiredReplicas
 }

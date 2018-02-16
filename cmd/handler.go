@@ -80,7 +80,7 @@ func (h *Handler) Run(v HPAView) (*int32, error) {
 	}
 
 	oldMinReplicas := v.MinReplicas()
-	newMinReplicas := max(v.CurrentReplicas()-1, *lrl)
+	newMinReplicas := max(v.DesiredReplicas()-1, *lrl)
 
 	if newMinReplicas == oldMinReplicas {
 		logger.Debug("(nothingtodohere)")
