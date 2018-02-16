@@ -32,49 +32,49 @@ func TestHandleValidCases(t *testing.T) {
 		name            string
 		offset          time.Duration
 		lowerLimit      int32
-		currentReplicas int32
+		desiredReplicas int32
 		expect          int32
 	}{
 		{
 			name:            "WithinCooldown",
 			offset:          3 * time.Minute,
 			lowerLimit:      6,
-			currentReplicas: 11,
+			desiredReplicas: 11,
 			expect:          10,
 		},
 		{
 			name:            "AfterCooldown",
 			offset:          10 * time.Minute,
 			lowerLimit:      6,
-			currentReplicas: 11,
+			desiredReplicas: 11,
 			expect:          10,
 		},
 		{
 			name:            "NoActionLowerLimit",
 			offset:          10 * time.Minute,
 			lowerLimit:      11,
-			currentReplicas: 11,
+			desiredReplicas: 11,
 			expect:          11,
 		},
 		{
 			name:            "EnforceLowerLimit",
 			offset:          10 * time.Minute,
 			lowerLimit:      12,
-			currentReplicas: 11,
+			desiredReplicas: 11,
 			expect:          12,
 		},
 		{
 			name:            "ScaleUpWithinCooldown",
 			offset:          2 * time.Minute,
 			lowerLimit:      12,
-			currentReplicas: 20,
+			desiredReplicas: 20,
 			expect:          19,
 		},
 		{
 			name:            "ScaleUpAfterCooldown",
 			offset:          10 * time.Minute,
 			lowerLimit:      12,
-			currentReplicas: 20,
+			desiredReplicas: 20,
 			expect:          19,
 		},
 	}
@@ -82,7 +82,7 @@ func TestHandleValidCases(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			hpa := testCreateHPA()
-			hpa.Status.CurrentReplicas = tc.currentReplicas
+			hpa.Status.DesiredReplicas = tc.desiredReplicas
 			hpa.ObjectMeta.Annotations["rebuy.com/kubernetes-hpaa.lower-replica-limit"] = fmt.Sprint(tc.lowerLimit)
 			hpa.ObjectMeta.Annotations["rebuy.com/kubernetes-hpaa.downscale-cooldown"] = "5m"
 			v := HPAView(*hpa)
