@@ -7,5 +7,5 @@
 
 Tames the Horizontal Pod Autoscaler, so stops to happily kill 90% of the replicas, all of a sudden.
 
-> **Development Status** *kubernetes-hpaa* is in an early development phase.
-> Expect incompatible changes and abandoment at any time.
+> **Development Status** *kubernetes-hpaa* did not work as expected and we
+> stopped developing it. We discourage from using it.
